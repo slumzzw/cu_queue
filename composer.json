@@ -1,0 +1,22 @@
+{
+    "name": "javion/cu_queue",
+    "description": "A commonly used queue tool",
+    "keywords": ["php", "queue", "队列工具", "延时队列"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Javion",
+            "email": "javionzzw@126.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "catfan/medoo": "v1.7.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Javion\\cu_queue\\": "src/"
+        }
+    }
+}
