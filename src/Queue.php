@@ -75,10 +75,18 @@ Class Queue{
         return $this->configPath;
     }
 
-    //初始化、检测配置信息
+    /**
+     * 初始化、检测配置信息
+     * @throws \Exception
+     */
     private function init(){
         if ($this->isInit){
             return;
+        }
+        //支持php5.6及以上版本
+        if (version_compare(PHP_VERSION, '5.6.0') == -1){
+            $this->log('php version need ge 5.6.0 ');
+            throw new \Exception('php version need ge 5.6.0 ');
         }
         $arrNeedCheck = array(
             'base' => array('queue_type', 'structure', 'pipe_path')
