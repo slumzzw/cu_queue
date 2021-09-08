@@ -46,6 +46,8 @@ Class Queue{
     private $objLog = null;
     //队列载体对象
     private $objStructure = null;
+    //钉钉通知webhook
+    public $strDingHook = null;
 
     public function __construct($configPath = '')
     {
@@ -122,6 +124,9 @@ Class Queue{
         if (isset($arrConf['base']['log_file']) && $arrConf['base']['log_file']){
             $this->logFile = $arrConf['base']['log_file'];
             $this->objLog->setLogFile($this->logFile);
+        }
+        if (!empty($arrConf['base']['ding_hook'])){
+            $this->strDingHook = $arrConf['base']['ding_hook'];
         }
         //队列类型数据
         $arrayType = array();

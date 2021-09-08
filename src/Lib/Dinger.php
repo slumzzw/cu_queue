@@ -11,13 +11,8 @@ class Dinger{
         $this->_init($strDinger);
     }
 
-    private function _init($strDinger){
-        $arrDingConf = Glo_Conf::getConfArray('dingding.ini', $strDinger);//需在conf/dingding.ini文件中有对应配置项
-        if ($arrDingConf == false || !isset($arrDingConf['webhook'])){
-            return;
-        }
-
-        $this->strWebHook = $arrDingConf['webhook'];
+    private function _init($strWebHook){
+        $this->strWebHook = $strWebHook;
     }
 
     //设置@所有人
@@ -46,7 +41,7 @@ class Dinger{
         * 同一个机器人一分钟内最多发送20条消息
      */
     public function sendMsg($strContent, $arrAt = array(), $strType = "text"){
-        if (empty($strContent) || !is_array($arrAt) || $strType != "text" || empty($this->strWebHook)) {  
+        if (empty($strContent) || !is_array($arrAt) || $strType != "text" || empty($this->strWebHook)) {
             return false;
         }
 

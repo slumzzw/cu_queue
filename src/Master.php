@@ -55,7 +55,6 @@ class Master{
         $this->childOverTime = $objQueue->wokerExecTime;
         $this->startTime = time();
         $this->process = $objQueue->arrProcess;
-        //$this->pipePath = sprintf('%s_queue_%s_%s_pipe_file.txt', $this->objQueue->pipePath, posix_getpid(), $this->startTime);
         $this->pipePath = $this->objQueue->pipePath;
         //赋值一个timer进程
         $timerProcess = array(
@@ -369,7 +368,7 @@ class Master{
                 }
             }
             //超过最大值，判断是否钉钉通知
-            if (false && ($item['leftNum'] > $this->process[$type]['thresholdNum']) &&
+            if (($item['leftNum'] > $this->process[$type]['thresholdNum']) &&
                 (isset($this->process[$type]['isMoreNotice']) && $this->process[$type]['isMoreNotice']) &&
                 (time() - $lastNoticTime >= 30*60)) {
                 $lastNoticTime = time();
@@ -458,7 +457,7 @@ class Master{
     private function dingdingNotice($strQueueName, $intAll, $intCur, $intMax){
         $arrErrorMsg[] = "【队列积压通知】队列类型：{$strQueueName},当前积压数：{$intAll},当前消费进程数：{$intCur},持续拉起最大进程数：{$intMax}\n";
         $strErrorMsg = implode("\n", $arrErrorMsg);
-        $objDinger = new Dinger("queue");
+        $objDinger = new Dinger($this->objQueue->strDingHook);
         $objDinger->sendMsg($strErrorMsg);
     }
 }
