@@ -16,7 +16,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Javion\\cu_queue\\": "src/"
+            "Javion\\cu_queue\\": "src/",
+            "Javion\\cu_test\\": "test/"
         }
     }
 }

@@ -85,7 +85,7 @@ Class Queue{
         );
         $arrConf = array();
         if (file_exists($this->configPath)){
-            $arrConf = parse_ini_file($this->configPath, true);
+            $arrConf = $this->parseIniFile($this->configPath);
         }
         if (empty($arrConf)){
             $this->log('config error', array('confFile' => $this->configPath));
@@ -141,8 +141,6 @@ Class Queue{
                 'isMoreNotice' => isset($arrConf[$item]['is_more_notice']) ? $arrConf[$item]['is_more_notice'] : 0,
                 'typeName' => $item,
                 'consumeNum' => isset($arrConf[$item]['consume_num']) ? $arrConf[$item]['consume_num'] : 10,
-                'is_special' => isset($arrConf[$item]['is_special']) ? $arrConf[$item]['is_special'] : false,
-                'force_index' => isset($arrConf[$item]['force_index']) ? $arrConf[$item]['force_index'] : (isset($arrConf['base']['force_index']) ? $arrConf['base']['force_index'] : false),
             );
             $this->arrProcess[$arrConf[$item]['type']] = $queue;
         }
@@ -199,7 +197,7 @@ Class Queue{
             $this->log('rabbit config error', array('confFile' => $this->configPath));
             die('config error');
         }
-        $structureClass = 'Glo_Cq_Structure_'. ucfirst($this->arrConfig['base']['structure']);
+        $structureClass = "\\Javion\\cu_queue\\Structure\\". ucfirst($this->arrConfig['base']['structure']);
         if (class_exists($structureClass)) {
             $structure = new $structureClass;
         } elseif (class_exists($this->arrConfig['base']['structure'])) {
@@ -223,6 +221,19 @@ Class Queue{
         $structure->setOptions($arrStructureConfig);
         $this->setStructure($structure);
         $this->isInit = true;
+    }
+
+    private function parseIniFile($file){
+        $arrConf = parse_ini_file($this->configPath, true);
+        foreach ($arrConf as $key => $value){
+            if (strpos($key, ':') !== false){
+                unset($arrConf[$key]);
+                $strNewKey = explode(':', $key)[0];
+                $arrConf[$strNewKey] = $value;
+            }
+        }
+
+        return $arrConf;
     }
 
     /**

@@ -178,7 +178,7 @@ class Mysql implements StructureInterface {
             "AND" => array(
                 "conn_id" => 0,
                 "type" => intval($type),
-                "`status`" => Task::STATUS_NEW,
+                "status" => Task::STATUS_NEW,
             ),
             'LIMIT' => $intNum
         );
@@ -197,7 +197,7 @@ class Mysql implements StructureInterface {
         }
         $arrCond = array(
             'conn_id' => $pid,
-            '`status`' => Task::STATUS_PROCESS,
+            'status' => Task::STATUS_PROCESS,
         );
         $arrQueueList = $objDaoQueue->getListByConds('*', $arrCond);
         !$arrQueueList && $arrQueueList = [];
@@ -210,13 +210,13 @@ class Mysql implements StructureInterface {
         $objDaoQueue->setTableName($this->strTableName);
         $dbQueueLog = $objDaoQueue->getRecordByConds('*', array('id' => $id));
         $arrdata = array(
-            "`status`" => $status,
+            "status" => $status,
             'mark' => $mark,
             'update_time' => time()
         );
         if (Task::STATUS_NEW == $status){
             $arrdata['conn_id'] = 0;
-            $arrdata['`status`'] = Task::STATUS_SUCCESS;
+            $arrdata['status'] = Task::STATUS_SUCCESS;
             $dbQueueLog['preexec_time'] = time();
             isset($arrExt['preexec_time']) && $dbQueueLog['preexec_time'] = $arrExt['preexec_time'];
             isset($arrExt['try_num']) && $dbQueueLog['try_num'] = $arrExt['try_num'];
@@ -281,7 +281,7 @@ class Mysql implements StructureInterface {
             $arrConds = array(
                 'type' => $item,
                 'conn_id' => 0,
-                "`status`" => 0,
+                "status" => 0,
             );
             $leftNum = $objDaoQueue->getCntByConds($arrConds);
             $thresholdNum = $this->arrProcessConf[$item]['thresholdNum'];
@@ -313,7 +313,7 @@ class Mysql implements StructureInterface {
         $objDaoQueue->setTableName($this->strTableName);
         $arrConds = array(
             "type" => $type,
-            "`status`" => Task::STATUS_PROCESS,
+            "status" => Task::STATUS_PROCESS,
             "conn_id[!]" => $arrPid,
             'update_time[<=]' => time()-3600, //1h前
         );
@@ -339,7 +339,7 @@ class Mysql implements StructureInterface {
             $arrReConds["id"] = $arrReTry;
             $arrSave = array(
                 'conn_id' => 0,
-                '`status`' => Task::STATUS_NEW,
+                'status' => Task::STATUS_NEW,
                 'update_time' => time(),
                 'preexec_time' => time() + 60,
                 'mark' => '重置',
@@ -352,7 +352,7 @@ class Mysql implements StructureInterface {
             $arrFaConds = $arrConds;
             $arrFaConds["id"] = $arrFail;
             $arrSave = array(
-                '`status`' => Task::STATUS_FAIL,
+                'status' => Task::STATUS_FAIL,
                 'update_time' => time(),
                 'mark' => '达到重置最大次数',
             );
@@ -374,7 +374,7 @@ class Mysql implements StructureInterface {
         $intConnId = posix_getpid();
         $arrConds = array(
             "type" => $type,
-            "`status`" => Task::STATUS_PROCESS,
+            "status" => Task::STATUS_PROCESS,
             "conn_id" => $intConnId,
         );
         $arrList = $objDaoQueue->getListByConds(array('id'), $arrConds);
@@ -385,7 +385,7 @@ class Mysql implements StructureInterface {
         $arrConds["id"] = $arrId;
         $arrSave = array(
             'conn_id' => 0,
-            '`status`' => Task::STATUS_NEW,
+            'status' => Task::STATUS_NEW,
             'update_time' => time(),
             'mark' => '退出复位'
         );
@@ -470,25 +470,47 @@ class Mysql implements StructureInterface {
 
     /* 队列表结构
   CREATE TABLE `common_queue` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增id',
-  `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '队列类型，代码业务备注',
-  `sub_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '队列类型，代码业务备注',
-  `conn_id` int(11) NOT NULL DEFAULT '0' COMMENT '消费者标识',
-  `param_content` text COMMENT '队列入参',
-  `status` tinyint(2) NOT NULL DEFAULT '0' COMMENT '0新建 1消费中 2成功 3失败 4需重试',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '状态变更时间',
-  `preexec_time` int(11) NOT NULL DEFAULT '0' COMMENT '预消费时间',
-  `p_key` varchar(100) NOT NULL DEFAULT '' COMMENT '业务唯一标识key，查询用',
-  `mark` varchar(255) NOT NULL DEFAULT '' COMMENT '备注',
-  `level` int(11) NOT NULL DEFAULT '0' COMMENT '优先级 值越大优先级越高',
-  `try_num` int(11) NOT NULL DEFAULT '0' COMMENT '重试次数',
-  PRIMARY KEY (`id`),
-  KEY `indx_s` (`p_key`,`type`) USING BTREE,
-  KEY `indx_exec` (`conn_id`,`status`) USING BTREE,
-  KEY `indx_level` (`level`) USING BTREE,
-  KEY `indx_type_status` (`type`,`status`),
-  KEY `indx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+	`id` BIGINT ( 11 ) NOT NULL AUTO_INCREMENT COMMENT '自增id',
+	`type` TINYINT ( 4 ) NOT NULL DEFAULT '0' COMMENT '队列类型，代码业务备注',
+	`sub_type` TINYINT ( 4 ) NOT NULL DEFAULT '0' COMMENT '队列类型，代码业务备注',
+	`conn_id` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '消费者标识',
+	`param_content` text COMMENT '队列入参',
+	`status` TINYINT ( 2 ) NOT NULL DEFAULT '0' COMMENT '0新建 1消费中 2成功 3失败 4需重试',
+	`create_time` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '创建时间',
+	`update_time` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '状态变更时间',
+	`preexec_time` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '预消费时间',
+	`p_key` VARCHAR ( 100 ) NOT NULL DEFAULT '' COMMENT '业务唯一标识key，查询用',
+	`mark` VARCHAR ( 255 ) NOT NULL DEFAULT '' COMMENT '备注',
+	`level` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '优先级 值越大优先级越高',
+	`try_num` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '重试次数',
+	PRIMARY KEY ( `id` ),
+	KEY `indx_s` ( `p_key`, `type` ) USING BTREE,
+	KEY `indx_exec` ( `conn_id`, `status` ) USING BTREE,
+	KEY `indx_level` ( `level` ) USING BTREE,
+	KEY `indx_type_status` ( `type`, `status` ),
+	KEY `indx_status` ( `status` ),
+    KEY `indx_get` ( `conn_id`, `type`, `status`, `preexec_time` ) USING BTREE
+    ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+    CREATE TABLE `common_delay_queue` (
+	`id` BIGINT ( 20 ) NOT NULL AUTO_INCREMENT COMMENT '自增id',
+	`type` TINYINT ( 4 ) NOT NULL DEFAULT '0' COMMENT '队列类型，代码业务备注',
+	`sub_type` TINYINT ( 4 ) NOT NULL DEFAULT '0' COMMENT '队列类型，代码业务备注',
+	`param_content` text COMMENT '队列入参',
+	`create_time` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '创建时间',
+	`update_time` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '状态变更时间',
+	`preexec_time` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '预消费时间',
+	`p_key` VARCHAR ( 100 ) NOT NULL DEFAULT '' COMMENT '业务唯一标识key，查询用',
+	`level` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '优先级 值越大优先级越高',
+	`try_num` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '重试次数',
+	`relate_old_id` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '关联的旧id',
+	`preexec_day` INT ( 11 ) NOT NULL DEFAULT '0' COMMENT '预消费日期',
+	`is_exec` TINYINT ( 1 ) NOT NULL DEFAULT '0' COMMENT '是否执行 0 否 1执行',
+	PRIMARY KEY ( `id` ),
+	KEY `indx_day` ( `preexec_time` ) USING BTREE,
+	KEY `indx_day_time` ( `preexec_day`, `preexec_time` ) USING BTREE,
+	KEY `indx_key` ( `p_key` ) USING BTREE,
+	KEY `indx_type` ( `type`, `sub_type` ) USING BTREE
+    ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4
      */
 }

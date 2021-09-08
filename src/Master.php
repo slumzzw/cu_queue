@@ -458,7 +458,7 @@ class Master{
     private function dingdingNotice($strQueueName, $intAll, $intCur, $intMax){
         $arrErrorMsg[] = "【队列积压通知】队列类型：{$strQueueName},当前积压数：{$intAll},当前消费进程数：{$intCur},持续拉起最大进程数：{$intMax}\n";
         $strErrorMsg = implode("\n", $arrErrorMsg);
-        $objDinger = new Dinger("examqueue");
+        $objDinger = new Dinger("queue");
         $objDinger->sendMsg($strErrorMsg);
     }
 }
